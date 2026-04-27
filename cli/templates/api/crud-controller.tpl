@@ -29,7 +29,7 @@ public class {{Name}}Controller : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create({{Name}} model)
+    public async Task<IActionResult> Create(Models.{{Name}} model)
     {
         model.Id = Guid.NewGuid();
         await _repository.CreateAsync(model);

@@ -22,7 +22,7 @@ describe('{{Name}}Page', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/{{Name}}/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /{{Name}}/i })).toBeInTheDocument();
     expect(screen.getByText(/Mock {{Name}}/i)).toBeInTheDocument();
   });
 });

@@ -1,6 +1,6 @@
 # Rock Paper Scissors - Implementation Guide
 
-To build a **Rock Paper Scissors** game using the Nexus SaaS Template, you can leverage the built-in scaffolding tools to generate a true End-to-End (E2E) feature. This includes the database migration, backend API, frontend React components, and a full suite of automated tests.
+To build a **Rock Paper Scissors** game using the Nexus SaaS Template, you can leverage the built-in automated scaffolding tools to generate a true End-to-End (E2E) feature. This includes the database migration, backend API, frontend React components, and a full suite of automated tests.
 
 ## Step 1: Scaffold the Game Feature
 
@@ -10,44 +10,18 @@ Run the following command from the root of the repository to generate the entire
 node cli/scaffold.js crud GameMatch
 ```
 
-**What this generates:**
+**What this automatically generates and wires up:**
 - **Database**: A unique timestamped SQL migration script `..._CreateGameMatch.sql`.
-- **Backend (API)**: `GameMatchController.cs`, `GameMatchRepository.cs`, and the `GameMatch.cs` data model.
-- **Frontend (UI)**: `GameMatchPage.tsx` and a custom data-fetching hook `useGameMatch.ts`.
+- **Backend (API)**: `GameMatchController.cs`, `GameMatchRepository.cs`, and the `GameMatch.cs` data model. It also **auto-registers** the repository in `Program.cs`.
+- **Frontend (UI)**: `GameMatchPage.tsx` and a custom data-fetching hook `useGameMatch.ts`. It also **auto-adds** the route to `App.tsx`.
 - **Testing**: 
   - Backend integration tests using Testcontainers (`GameMatchTests.cs`).
   - Full-stack E2E tests using Playwright (`GameMatchE2ETests.cs`).
   - Frontend component tests using Vitest (`GameMatchPage.test.tsx`).
 
-## Step 2: Register the Feature
+## Step 2: Implement Game Logic
 
-After running the scaffold command, you need to manually link the generated code into the application pipeline.
-
-1. **Backend (Dependency Injection)**:
-   Open `backend/src/Nexus.Api/Program.cs` and register the repository so the controller can use it:
-   ```csharp
-   builder.Services.AddScoped<Nexus.Api.Features.GameMatch.Repositories.GameMatchRepository>();
-   ```
-
-2. **Frontend (Routing)**:
-   Open `frontend/src/App.tsx`, import the new page, and add a route inside the `<Routes>` block:
-   ```tsx
-   import GameMatchPage from './pages/GameMatchPage';
-
-   // ... inside <Routes>
-   <Route
-     path="/gamematch"
-     element={
-       <ProtectedRoute>
-         <GameMatchPage />
-       </ProtectedRoute>
-     }
-   />
-   ```
-
-## Step 3: Implement Game Logic
-
-Now that the structural boilerplate is in place, you can implement the specific rules of Rock Paper Scissors.
+Now that the structural boilerplate and automated wiring are in place, you can implement the specific rules of Rock Paper Scissors.
 
 1. **Update the Database Model (`GameMatch.cs` and Migration Script)**:
    Add properties for `Player1Move`, `Player2Move`, and `Result`.
@@ -56,9 +30,9 @@ Now that the structural boilerplate is in place, you can implement the specific 
 3. **Implement the Game Rules (`GameMatchController.cs`)**:
    Create a new POST endpoint (e.g., `/api/gamematch/{id}/move`) that accepts a player's move, checks if the opponent has moved, and determines the winner based on the classic rules (Rock beats Scissors, Scissors beats Paper, etc.).
 4. **Build the UI (`GameMatchPage.tsx`)**:
-   Replace the scaffolded data table with a game interface featuring buttons for Rock, Paper, and Scissors. Use the `useGameMatch` hook to post moves to the backend.
+   Replace the scaffolded data table with a game interface featuring buttons for Rock, Paper, and Scissors. Use the `useGameMatch` hook to post moves to the backend. The scaffolded page already includes an actionable "Create GameMatch" button to help you get started.
 
-## Step 4: Verify with Tests
+## Step 3: Verify with Tests
 
 Ensure your game logic is solid by running the automatically scaffolded test suites:
 
@@ -73,4 +47,4 @@ Ensure your game logic is solid by running the automatically scaffolded test sui
   npm test
   ```
 
-By following this workflow, you demonstrate a highly efficient, test-driven approach to feature development expected of a Team Lead.
+By following this workflow, you demonstrate a highly efficient, test-driven approach to feature development expected of a Team Lead. The boilerplate does the heavy lifting so you can focus purely on business logic.

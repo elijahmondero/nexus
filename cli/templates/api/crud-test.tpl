@@ -30,7 +30,7 @@ public class {{Name}}Tests : IClassFixture<ApiFixture>
     public async Task Create{{Name}}_WithValidData_Returns201()
     {
         // Arrange
-        var model = new {{Name}} { Name = "Test {{Name}}" };
+        var model = new Models.{{Name}} { Name = "Test {{Name}}" };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/{{Name}}", model);

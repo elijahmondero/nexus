@@ -14,19 +14,19 @@ public class {{Name}}Repository
         _db = db;
     }
 
-    public async Task<IEnumerable<{{Name}}>> GetAllAsync()
+    public async Task<IEnumerable<Models.{{Name}}>> GetAllAsync()
     {
         using var db = _db.CreateConnection();
-        return await db.QueryAsync<{{Name}}>("SELECT * FROM {{TableName}}");
+        return await db.QueryAsync<Models.{{Name}}>("SELECT * FROM {{TableName}}");
     }
 
-    public async Task<{{Name}}?> GetByIdAsync(Guid id)
+    public async Task<Models.{{Name}}?> GetByIdAsync(Guid id)
     {
         using var db = _db.CreateConnection();
-        return await db.QueryFirstOrDefaultAsync<{{Name}}>("SELECT * FROM {{TableName}} WHERE id = @id", new { id });
+        return await db.QueryFirstOrDefaultAsync<Models.{{Name}}>("SELECT * FROM {{TableName}} WHERE id = @id", new { id });
     }
 
-    public async Task CreateAsync({{Name}} model)
+    public async Task CreateAsync(Models.{{Name}} model)
     {
         using var db = _db.CreateConnection();
         await db.ExecuteAsync("INSERT INTO {{TableName}} (id, name) VALUES (@Id, @Name)", model);

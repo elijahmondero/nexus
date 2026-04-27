@@ -14,7 +14,7 @@ describe('LoginPage', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/Login/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Login/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Login/i })).toBeInTheDocument();

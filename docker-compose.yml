@@ -1,0 +1,82 @@
+services:
+  postgres:
+    profiles: [postgres]
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nexus
+      POSTGRES_USER: nexus
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+
+  sqlserver:
+    profiles: [sqlserver]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: ${DB_PASSWORD}
+      ACCEPT_EULA: Y
+    ports:
+      - "1433:1433"
+
+  mysql:
+    profiles: [mysql]
+    image: mysql:8-debian
+    environment:
+      MYSQL_DATABASE: nexus
+      MYSQL_USER: nexus
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    ports:
+      - "4318:4318"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+      - DB_PROVIDER=${DB_PROVIDER}
+      - JWT__SECRET=${JWT_SECRET}
+      - JWT__ISSUER=${JWT_ISSUER}
+      - JWT__AUDIENCE=${JWT_AUDIENCE}
+      - JWT__EXPIRYMINUTES=${JWT_EXPIRY_MINUTES}
+    env_file: .env
+    depends_on:
+      - zipkin
+
+  bff:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    env_file: .env
+    ports:
+      - "3000:8080"
+    depends_on:
+      - api
+      - frontend
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build
+    command: npm run dev -- --host
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"

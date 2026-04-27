@@ -1,0 +1,26 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# .NET
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.doccache
+appsettings.Development.json
+
+# Node
+node_modules/
+dist/
+.eslintcache
+
+# Env
+.env
+docker-compose.override.yml
+
+# OS
+Thumbs.db
+.DS_Store

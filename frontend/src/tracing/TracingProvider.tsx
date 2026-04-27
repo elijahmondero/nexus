@@ -1,10 +1,7 @@
-// @ts-nocheck
 import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { WebTracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace-web';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 
@@ -16,19 +13,18 @@ export const TracingProvider: React.FC<{ children: ReactNode }> = ({ children })
     initialized = true;
 
     try {
+      // In newer versions of OTel, spanProcessors are passed to the constructor.
+      // We omit 'resource' to avoid Vite build issues with ESM exports,
+      // relying on environment variables (OTEL_SERVICE_NAME) or defaults.
       const provider = new WebTracerProvider({
-        resource: new Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: 'nexus-frontend',
-        }),
+        spanProcessors: [
+          new BatchSpanProcessor(
+            new OTLPTraceExporter({
+              url: 'http://localhost:4318/v1/traces',
+            })
+          ),
+        ],
       });
-
-      provider.addSpanProcessor(
-        new BatchSpanProcessor(
-          new OTLPTraceExporter({
-            url: 'http://localhost:4318/v1/traces',
-          })
-        )
-      );
 
       provider.register();
 

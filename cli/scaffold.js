@@ -29,6 +29,58 @@ const templates = {
   }
 };
 
+function autoRegister() {
+  console.log('\n--- Automating Registrations ---');
+  // Backend Program.cs
+  const programPath = path.join(process.cwd(), 'backend/src/Nexus.Api/Program.cs');
+  if (fs.existsSync(programPath)) {
+    let programContent = fs.readFileSync(programPath, 'utf8');
+    const serviceRegistration = `builder.Services.AddScoped<Nexus.Api.Features.${name}.Repositories.${name}Repository>();`;
+    if (!programContent.includes(serviceRegistration)) {
+      programContent = programContent.replace(
+        'builder.Services.AddScoped<AuthService>();',
+        `builder.Services.AddScoped<AuthService>();\n${serviceRegistration}`
+      );
+      fs.writeFileSync(programPath, programContent);
+      console.log(`✅ Auto-registered ${name}Repository in Program.cs`);
+    } else {
+      console.log(`ℹ️  ${name}Repository already registered in Program.cs`);
+    }
+  }
+
+  // Frontend App.tsx
+  const appPath = path.join(process.cwd(), 'frontend/src/App.tsx');
+  if (fs.existsSync(appPath)) {
+    let appContent = fs.readFileSync(appPath, 'utf8');
+    const importStatement = `import ${name}Page from './pages/${name}Page';`;
+    const routeStatement = `<Route\n              path="/${name.toLowerCase()}"\n              element={\n                <ProtectedRoute>\n                  <${name}Page />\n                </ProtectedRoute>\n              }\n            />`;
+    
+    let changed = false;
+    if (!appContent.includes(importStatement)) {
+      appContent = appContent.replace(
+        "import HomePage from './pages/HomePage';",
+        `import HomePage from './pages/HomePage';\n${importStatement}`
+      );
+      changed = true;
+    }
+    if (!appContent.includes(`<${name}Page />`)) {
+      // Find the last route element before </Routes> and insert there
+      appContent = appContent.replace(
+        '          </Routes>',
+        `            ${routeStatement}\n          </Routes>`
+      );
+      changed = true;
+    }
+    
+    if (changed) {
+      fs.writeFileSync(appPath, appContent);
+      console.log(`✅ Auto-registered ${name}Page route in App.tsx`);
+    } else {
+      console.log(`ℹ️  ${name}Page route already registered in App.tsx`);
+    }
+  }
+}
+
 function scaffold(type) {
   const config = templates[type];
   if (!config) {
@@ -43,7 +95,7 @@ function scaffold(type) {
     content = content.replace(/{{Name}}/g, name);
     content = content.replace(/{{Namespace}}/g, `Nexus.Api.Features.${name}`);
     content = content.replace(/{{TableName}}/g, name.toLowerCase() + "s");
-    content = content.replace(/{{Name.toLowerCase\(\)}}/g, name.toLowerCase());
+    content = content.replace(/{{Name\.toLowerCase\(\)}}/g, name.toLowerCase());
 
     const outPath = path.join(process.cwd(), item.out);
     const outDir = path.dirname(outPath);
@@ -56,12 +108,12 @@ function scaffold(type) {
     console.log(`Created: ${item.out}`);
   });
 
-  console.log('\n✅ Full-Stack E2E feature scaffolded successfully!');
+  autoRegister();
+
+  console.log('\n✅ Full-Stack feature scaffolded and automatically wired up successfully!');
   console.log('\nNext steps:');
-  console.log(`1. Backend: Register the repository in Program.cs:`);
-  console.log(`   builder.Services.AddScoped<${name}Repository>();`);
-  console.log(`2. Frontend: Add the route to App.tsx:`);
-  console.log(`   <Route path="/${name.toLowerCase()}" element={<ProtectedRoute><${name}Page /></ProtectedRoute>} />`);
+  console.log(`1. Review the generated files in backend/src/Nexus.Api/Features/${name} and frontend/src/pages/${name}Page.tsx`);
+  console.log(`2. Modify the model and SQL migration script to suit your needs.`);
   console.log(`3. Run tests:`);
   console.log(`   dotnet test (API + E2E)`);
   console.log(`   cd frontend && npm test (Frontend Unit)`);
